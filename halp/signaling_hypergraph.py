@@ -226,7 +226,7 @@ class SignalingHypergraph(object):
         # If the node hasn't previously been added, add it along
         # with its attributes
         if not self.has_node(node):
-        	attr_dict["__in_hypernodes"] = set()
+            attr_dict["__in_hypernodes"] = set()
             self._node_attributes[node] = attr_dict
         # Otherwise, just update the node's attributes
         else:
@@ -246,7 +246,7 @@ class SignalingHypergraph(object):
         """
         return iter(self._node_attributes)
 
-	def has_hypernode(self, hypernode):
+    def has_hypernode(self, hypernode):
         """Determines if a specific hypernode is present in the hypergraph.
 
         :param node: reference to hypernode whose presence is being checked.
@@ -256,48 +256,48 @@ class SignalingHypergraph(object):
         return hypernode in self._hypernode_attributes
 
     def map_hypernode_to_nodes(self, hypernode, nodes):
-    	"""Informs the library of the hypernode<-->nodes mapping.
+        """Informs the library of the hypernode<-->nodes mapping.
 
-    	:param hypernode: the hypernode to map to a group of nodes
-    	:param nodes: the group of nodes to map to the hypernode
+        :param hypernode: the hypernode to map to a group of nodes
+        :param nodes: the group of nodes to map to the hypernode
 
-    	"""
-    	pass
+        """
+        pass
 
     def _add_hypernode_membership(self, node, hypernode):
-		"""Adds the given hypernode into the node's "membership" structure,
-		indicating that this node is a member of the given hypernode.
+        """Adds the given hypernode into the node's "membership" structure,
+        indicating that this node is a member of the given hypernode.
 
         :param node: reference to the node whose hypernode membership is
-        			being modified.
-		:param hypernode: reference to the hypernode that the given node is
-						a member of.
+                    being modified.
+        :param hypernode: reference to the hypernode that the given node is
+                        a member of.
         :raises: ValueError -- No such node exists.
         :raises: ValueError -- No such hypernode exists.
 
         """
         if not self.has_node(node):
             raise ValueError("No such node exists.")
-        if not self.has_hypernode(hypernode)
+        if not self.has_hypernode(hypernode):
             raise ValueError("No such hypernode exists.")
 
         self._node_attributes[node]["__in_hypernodes"].add(hypernode)
 
     def _remove_hypernode_membership(self, node, hypernode):
-		"""Removes the given hypernode into the node's "membership" structure,
-		indicating that this node is no longer a member of the given hypernode.
+        """Removes the given hypernode into the node's "membership" structure,
+        indicating that this node is no longer a member of the given hypernode.
 
         :param node: reference to the node whose hypernode membership is
-        			being modified.
-		:param hypernode: reference to the hypernode that the given node is
-						no longer a member of.
+                    being modified.
+        :param hypernode: reference to the hypernode that the given node is
+                        no longer a member of.
         :raises: ValueError -- No such node exists.
         :raises: ValueError -- No such hypernode exists.
 
         """
         if not self.has_node(node):
             raise ValueError("No such node exists.")
-        if not self.has_hypernode(hypernode)
+        if not self.has_hypernode(hypernode):
             raise ValueError("No such hypernode exists.")
 
         self._node_attributes[node]["__in_hypernodes"].remove(hypernode)
@@ -308,9 +308,9 @@ class SignalingHypergraph(object):
 
         :param hypernode: reference to the hypernode being added.
         :param nodes: reference to the set of nodes that compose
-        			the hypernode.
+                    the hypernode.
         :param in_hypernodes: set of references to the hypernodes that the
-        			node being added is a member of.
+                    node being added is a member of.
         :param attr_dict: dictionary of attributes of the node.
         :param attr: keyword arguments of attributes of the node;
                     attr's values will override attr_dict's values
@@ -322,26 +322,26 @@ class SignalingHypergraph(object):
         # If the hypernode hasn't previously been added, add it along
         # with its attributes
         if not self.has_hypernode(hypernode):
-        	attr_dict["__composing_nodes"] = composing_nodes
-        	added_nodes = composing_nodes
-        	removed_nodes = set()
+            attr_dict["__composing_nodes"] = composing_nodes
+            added_nodes = composing_nodes
+            removed_nodes = set()
             self._hypernode_attributes[hypernode] = attr_dict
         # Otherwise, just update the hypernode's attributes
         else:
             self._hypernode_attributes[hypernode].update(attr_dict)
             added_nodes = composing_nodes - self._hypernode_attributes\
-            			  [hypernode]["__composing_nodes"]
-			removed_nodes = self._hypernode_attributes\
-            			  	[hypernode]["__composing_nodes"] - composing_nodes
+                            [hypernode]["__composing_nodes"]
+            removed_nodes = self._hypernode_attributes\
+                                [hypernode]["__composing_nodes"] - composing_nodes
         
         # For every "composing node" added to this hypernode, update
         # those nodes attributes to be members of this hypernode
-		for node in added_nodes:
-			_add_hypernode_membership(node, hypernode)
-		# For every "composing node" added to this hypernode, update
+        for node in added_nodes:
+            _add_hypernode_membership(node, hypernode)
+        # For every "composing node" added to this hypernode, update
         # those nodes attributes to no longer be members of this hypernode
         for node in remove_nodes:
-			_remove_hypernode_membership(node, hypernode)
+            _remove_hypernode_membership(node, hypernode)
 
     def get_hypernode_set(self):
         """Returns the set of hypernodes that are currently in the hypergraph.
@@ -367,8 +367,8 @@ class SignalingHypergraph(object):
         return "e" + str(self._current_hyperedge_id)
 
     def add_hyperedge(self, tail, head,
-    				  pos_regs=set(), neg_regs=set(),
-    				  attr_dict=None, **attr):
+                      pos_regs=set(), neg_regs=set(),
+                      attr_dict=None, **attr):
         """Adds a hyperedge to the hypergraph, along with any related
         attributes of the hyperedge.
         This method will automatically add any hypernode from the tail, head,
@@ -381,9 +381,9 @@ class SignalingHypergraph(object):
                     tail of the hyperedge to be added.
         :param head: iterable container of references to hypernodes in the
                     head of the hyperedge to be added.
-		:param pos_regs: iterable container of references to hypernodes that
+        :param pos_regs: iterable container of references to hypernodes that
                     are positive regulators for the hyperedge.
-		:param neg_regs: iterable container of references to hypernodes that
+        :param neg_regs: iterable container of references to hypernodes that
                     are negative regulators for the hyperedge.
         :param attr_dict: dictionary of attributes shared by all
                     the hyperedges.
@@ -441,8 +441,8 @@ class SignalingHypergraph(object):
             self._hyperedge_attributes[hyperedge_id] = \
                 {"tail": tail, "__frozen_tail": frozen_tail,
                  "head": head, "__frozen_head": frozen_head,
-                 "_signaling_id": 1
-                 "weight": 1}
+                 "_signaling_id": 1,
+                 "weight": 1,}
         else:
             # If its not a new hyperedge, just get its ID to update attributes
             hyperedge_id = self._successors[frozen_tail][frozen_head]
