@@ -349,9 +349,11 @@ class SignalingHypergraph(object):
     def add_hypernode(self, hypernode, composing_nodes=set(), attr_dict=None, **attr):
         """Adds a hypernode to the graph, along with any related attributes
            of the hypernode.
+           This method will automatically add any node from composing_nodes
+           that was not in the hypergraph.
 
         :param hypernode: reference to the hypernode being added.
-        :param nodes: reference to the set of nodes that compose
+        :param composing_nodes: reference to the set of nodes that compose
                     the hypernode.
         :param in_hypernodes: set of references to the hypernodes that the
                     node being added is a member of.
@@ -363,6 +365,9 @@ class SignalingHypergraph(object):
         """
         attr_dict = self._combine_attribute_arguments(attr_dict, attr)
 
+        # add any new nodes if necessary
+        self.add_nodes(composing_nodes)
+
         # If the hypernode hasn't previously been added, add it along
         # with its attributes
         if not self.has_hypernode(hypernode):
@@ -370,22 +375,25 @@ class SignalingHypergraph(object):
             added_nodes = composing_nodes
             removed_nodes = set()
             self._hypernode_attributes[hypernode] = attr_dict
+            self._forward_star[hypernode] = set()
+            self._backward_star[hypernode] = set()
+
         # Otherwise, just update the hypernode's attributes
         else:
             self._hypernode_attributes[hypernode].update(attr_dict)
-            added_nodes = composing_nodes - self._hypernode_attributes\
-                            [hypernode]["__composing_nodes"]
-            removed_nodes = self._hypernode_attributes\
-                                [hypernode]["__composing_nodes"] - composing_nodes
-        
+            added_nodes = composing_nodes.difference(self._hypernode_attributes\
+                          [hypernode]["__composing_nodes"])
+            removed_nodes = self._hypernode_attributes[hypernode]["__composing_nodes"]\
+                            .difference(composing_nodes)
+
         # For every "composing node" added to this hypernode, update
         # those nodes attributes to be members of this hypernode
         for node in added_nodes:
-            _add_hypernode_membership(node, hypernode)
+            self._add_hypernode_membership(node, hypernode)
         # For every "composing node" added to this hypernode, update
         # those nodes attributes to no longer be members of this hypernode
-        for node in remove_nodes:
-            _remove_hypernode_membership(node, hypernode)
+        for node in removed_nodes:
+            self._remove_hypernode_membership(node, hypernode)
 
     def get_hypernode_set(self):
         """Returns the set of hypernodes that are currently in the hypergraph.
