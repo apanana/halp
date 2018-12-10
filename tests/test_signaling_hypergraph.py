@@ -196,3 +196,70 @@ def test_add_hypernodes():
         pass
     except BaseException as e:
         assert False, e
+
+def test_add_hyperedge():
+    # Ha = (A,B,C)
+    # Hb = (D,E)
+    # Hc = (C,F)
+    # e1 = (Ha,Hb)->(Hc)
+
+    node_a = 'A'
+    node_b = 'B'
+    node_c = 'C'
+    node_d = 'D'
+    node_e = 'E'
+    node_f = 'F'
+
+    hypernode_a = 'Ha'
+    hypernode_b = 'Hb'
+    hypernode_c = 'Hc'
+
+    H = SignalingHypergraph()
+
+    # H.add_nodes([node_a, node_b, node_c, node_d, node_e, node_f])
+    # H.add_hypernode(hypernode_a, set([node_a, node_b, node_c]))
+    # H.add_hypernode(hypernode_b, set([node_d, node_e]))
+    # H.add_hypernode(hypernode_c, set([node_c, node_f]))
+
+    tail = set([hypernode_a, hypernode_b])
+    head = set([hypernode_c])
+    frozen_tail = frozenset(tail)
+    frozen_head = frozenset(head)
+    attrib = {'weight': 6, 'color': 'black'}
+
+    hyperedge_name = H.add_hyperedge(tail, head, attr_dict=attrib, weight=5) 
+    assert hyperedge_name == 'e1'
+
+    # Test that all hyperedge attributes are correct
+    assert H._hyperedge_attributes[hyperedge_name]['tail'] == tail
+    assert H._hyperedge_attributes[hyperedge_name]['head'] == head
+    assert H._hyperedge_attributes[hyperedge_name]['weight'] == 5
+    assert H._hyperedge_attributes[hyperedge_name]['color'] == 'black'
+
+    # Test that successor list contains the correct info
+    assert frozen_head in H._successors[frozen_tail]
+    assert hyperedge_name in H._successors[frozen_tail][frozen_head]
+
+    # Test that the precessor list contains the correct info
+    assert frozen_tail in H._predecessors[frozen_head]
+    assert hyperedge_name in H._predecessors[frozen_head][frozen_tail]
+
+    # Test that forward-stars and backward-stars contain the correct info
+    for node in frozen_tail:
+        assert hyperedge_name in H._forward_star[node]
+    for node in frozen_head:
+        assert hyperedge_name in H._backward_star[node]
+
+    # Test that adding same hyperedge will only update attributes
+    new_attrib = {'weight': 10}
+    H.add_hyperedge(tail, head, attr_dict=new_attrib)
+    assert H._hyperedge_attributes[hyperedge_name]['weight'] == 10
+    assert H._hyperedge_attributes[hyperedge_name]['color'] == 'black'
+
+    try:
+        H.add_hyperedge(set(), set())
+        assert False
+    except ValueError:
+        pass
+    except BaseException as e:
+        assert False, e

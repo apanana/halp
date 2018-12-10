@@ -464,6 +464,20 @@ class SignalingHypergraph(object):
         self._current_hyperedge_id += 1
         return "e" + str(self._current_hyperedge_id)
 
+    def _get_hypernode_refs(self, hypernodes):
+        """Returns a set of hypernode refs from a list hypernodes,
+            which may be a heterogeneous iterable container of
+            hypernode refs and tuples of:
+                (hypernode_ref, composing_nodes, attrs).
+        """
+        refs = set()
+        for hypernode in hypernodes:
+            if type(hypernode) is tuple:
+                refs.add(hypernode[0])
+            else:
+                refs.add(hypernode)
+        return refs
+
     def add_hyperedge(self, tail, head,
                       pos_regs=set(), neg_regs=set(),
                       attr_dict=None, **attr):
@@ -474,17 +488,20 @@ class SignalingHypergraph(object):
         in the hypergraph.
         A hyperedge without a "weight" attribute specified will be
         assigned the default value of 1.
+        Note that for tail, head, pos_regs, neg_regs:
+            hypernodes can either be references to existing hypernodes,
+            or tuples of (hypernode_ref, composing_nodes, attrs) for
+            new hypernodes.
 
-        :param tail: iterable container of references to hypernodes in the
-                    tail of the hyperedge to be added.
-        :param head: iterable container of references to hypernodes in the
+        :param tail: iterable container of hypernodes in the tail of the 
+                    hyperedge to be added.
+        :param head: iterable container of hypernodes in the
                     head of the hyperedge to be added.
-        :param pos_regs: iterable container of references to hypernodes that
+        :param pos_regs: iterable container of hypernodes that
                     are positive regulators for the hyperedge.
-        :param neg_regs: iterable container of references to hypernodes that
+        :param neg_regs: iterable container of hypernodes that
                     are negative regulators for the hyperedge.
-        :param attr_dict: dictionary of attributes shared by all
-                    the hyperedges.
+        :param attr_dict: dictionary of attributes of the hyperedge.
         :param attr: keyword arguments of attributes of the hyperedge;
                     attr's values will override attr_dict's values
                     if both are provided.
@@ -499,11 +516,17 @@ class SignalingHypergraph(object):
             raise ValueError("tail and head arguments \
                              cannot both be empty.")
 
+        # Get refs lists for tail, head, pos_regs, and neg_regs
+        tail_refs = self._get_hypernode_refs(tail)
+        head_refs = self._get_hypernode_refs(head)
+        pos_reg_refs = self._get_hypernode_refs(pos_regs)
+        neg_reg_refs = self._get_hypernode_refs(neg_regs)
+
         # Use frozensets for tail and head sets to allow for hashable keys
-        frozen_tail = frozenset(tail)
-        frozen_head = frozenset(head)
-        frozen_pos_regs = frozenset(pos_regs)
-        frozen_neg_regs = frozenset(neg_regs)
+        frozen_tail = frozenset(tail_refs)
+        frozen_head = frozenset(head_refs)
+        frozen_pos_regs = frozenset(pos_reg_refs)
+        frozen_neg_regs = frozenset(neg_reg_refs)
 
         # Initialize a successor dictionary for the tail and head, respectively
         if frozen_tail not in self._successors:
@@ -514,8 +537,8 @@ class SignalingHypergraph(object):
         is_new_diedge = not self.has_hyperedge(frozen_tail, frozen_head)
         if is_new_diedge:
             # Add tail and head nodes to graph (if not already present)
-            self.add_hypernodes(frozen_head)
-            self.add_hypernodes(frozen_tail)
+            self.add_hypernodes(head)
+            self.add_hypernodes(tail)
 
             # Create new hyperedge name to use as reference for that hyperedge
             hyperedge_id = self._assign_next_hyperedge_id()
@@ -537,10 +560,12 @@ class SignalingHypergraph(object):
             # original tail and head sets in order to return them exactly
             # as the user passed them into add_hyperedge.
             self._hyperedge_attributes[hyperedge_id] = \
-                {"tail": tail, "__frozen_tail": frozen_tail,
-                 "head": head, "__frozen_head": frozen_head,
+                {"tail": tail_refs, "__frozen_tail": frozen_tail,
+                 "head": head_refs, "__frozen_head": frozen_head,
+                 "pos_regs": pos_reg_refs, "__frozen_pos_regs": frozen_pos_regs, 
+                 "neg_regs": neg_reg_refs, "__frozen_neg_regs": frozen_neg_regs,
                  "_signaling_id": 1,
-                 "weight": 1,}
+                 "weight": 1}
         else:
             # If its not a new hyperedge, just get its ID to update attributes
             hyperedge_id = self._successors[frozen_tail][frozen_head]
@@ -548,3 +573,20 @@ class SignalingHypergraph(object):
         # Set attributes and return hyperedge ID
         self._hyperedge_attributes[hyperedge_id].update(attr_dict)
         return hyperedge_id
+
+    def has_hyperedge(self, tail, head):
+        """Given a tail and head set of nodes, returns whether there
+        is a hyperedge in the hypergraph that connects the tail set
+        to the head set.
+
+        :param tail: iterable container of references to nodes in the
+                    tail of the hyperedge being checked.
+        :param head: iterable container of references to nodes in the
+                    head of the hyperedge being checked.
+        :returns: bool -- true iff a hyperedge exists connecting the
+                specified tail set to the specified head set.
+        """
+        frozen_tail = frozenset(tail)
+        frozen_head = frozenset(head)
+        return frozen_tail in self._successors and \
+            frozen_head in self._successors[frozen_tail]
