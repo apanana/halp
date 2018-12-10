@@ -155,4 +155,44 @@ def test_add_hypernode():
     except BaseException as e:
         assert False, e
 
+def test_add_hypernodes():
+    node_a = 'A'
+    node_b = 'B'
+    node_c = 'C'
+    node_d = 'D'
+    node_e = 'E'
 
+    hypernode_a = 'Ha'
+    attrib_ha = {'alt_name': 1337}
+    hypernode_b = 'Hb'
+
+    # Test adding unadded nodes with various attribute settings
+    H = SignalingHypergraph()
+    H.add_nodes([node_a, node_b, node_c, node_d, node_e])
+    H.add_hypernode(hypernode_a, set([node_a, node_b, node_c]),attrib_ha, source=True)
+
+
+    assert node_a in H._node_attributes
+    assert H._node_attributes[node_a] == {"__in_hypernodes":set([hypernode_a])}
+
+    assert node_b in H._node_attributes
+    assert H._node_attributes[node_b] == {"__in_hypernodes":set([hypernode_a])}
+
+    assert node_c in H._node_attributes
+    assert H._node_attributes[node_c] == {"__in_hypernodes":set([hypernode_a])}
+
+    assert hypernode_a in H._hypernode_attributes
+    assert H._hypernode_attributes[hypernode_a]['source'] is True
+
+    # Test adding a node that has already been added
+    H.add_hypernode(hypernode_a, common=False)
+    assert H._hypernode_attributes[hypernode_a]['common'] is False
+
+    # Pass in bad (non-dict) attribute
+    try:
+        H.add_hypernode(hypernode_a, ["label", "black"])
+        assert False
+    except AttributeError:
+        pass
+    except BaseException as e:
+        assert False, e

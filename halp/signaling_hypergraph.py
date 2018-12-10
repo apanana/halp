@@ -395,6 +395,52 @@ class SignalingHypergraph(object):
         for node in removed_nodes:
             self._remove_hypernode_membership(node, hypernode)
 
+    def add_hypernodes(self, hypernodes, attr_dict=None, **attr):
+        """Adds multiple hypernodes to the graph, along with any related attributes
+            of the hypernodes.
+
+        :param hypernodes: iterable container to either references of the hypernodes
+                    OR tuples of:
+                        (hypernode reference, composing_nodes, attribute dictionary);
+                    if an attribute dictionary is provided in the tuple,
+                    its values will override both attr_dict's and attr's
+                    values.
+        :param attr_dict: dictionary of attributes shared by all the hypernodes.
+        :param attr: keyword arguments of attributes of the node;
+                    attr's values will override attr_dict's values
+                    if both are provided.
+
+        See also:
+        add_hypernode
+
+        Examples:
+        ::
+
+            >>> H = SignalingHypergraph()
+            >>> attributes = {label: "positive"}
+            >>> hypernode_list = ["Ha",
+                             ("Hb", ["a","b","c"], {label="negative"}),
+                             ("Hc", ["c","d"], {root=True})]
+            >>> H.add_hypernodes(hypernode_list, attributes)
+
+        """
+
+        attr_dict = self._combine_attribute_arguments(attr_dict, attr)
+        for hypernode in hypernodes:
+            # Note: This won't behave properly if the node is actually a tuple
+            if type(hypernode) is tuple:
+                # See ("Hb", ["a","b","c"], {label="negative"}) in the
+                # documentation example
+                new_hypernode, composing_nodes, hypernode_attr_dict = hypernode
+                # Create a new dictionary and load it with node_attr_dict and
+                # attr_dict, with the former (node_attr_dict) taking precedence
+                new_dict = attr_dict.copy()
+                new_dict.update(hypernode_attr_dict)
+                self.add_hypernode(new_hypernode, composing_nodes, new_dict)
+            else:
+                # See "A" in the documentation example
+                self.add_hypernode(hypernode, set(), attr_dict.copy())
+
     def get_hypernode_set(self):
         """Returns the set of hypernodes that are currently in the hypergraph.
 
