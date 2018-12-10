@@ -32,7 +32,7 @@ def test_add_node():
     assert H._node_attributes[node_d]['sink'] is False
 
     # Test adding a node that has already been added
-    H.add_nodes(node_a, common=False)
+    H.add_node(node_a, common=False)
     assert H._node_attributes[node_a]['common'] is False
 
     # Pass in bad (non-dict) attribute
