@@ -592,31 +592,116 @@ class SignalingHypergraph(object):
             frozen_head in self._successors[frozen_tail]
 
     def has_hyperedge_id(self, hyperedge_id):
-        pass
+        """Determines if a hyperedge referenced by hyperedge_id
+        exists in the hypergraph.
+
+        :param hyperedge_id: ID of the hyperedge whose existence is
+                            being checked.
+        :returns: bool -- true iff a hyperedge exists that has id hyperedge_id.
+
+        """
+        return hyperedge_id in self._hyperedge_attributes
 
     def get_hyperedge_id_set(self):
-        pass
+        """Returns the set of IDs of hyperedges that are currently
+        in the hypergraph.
+
+        :returns: set -- all IDs of hyperedges currently in the hypergraph
+
+        """
+        return set(self._hyperedge_attributes.keys())
 
     def get_hyperedge_attribute(self, hyperedge_id, attribute_name):
-        pass
+        """Given a hyperedge ID and the name of an attribute, get a copy
+        of that hyperedge's attribute.
+
+        :param hyperedge_id: ID of the hyperedge to retrieve the attribute of.
+        :param attribute_name: name of the attribute to retrieve.
+        :returns: attribute value of the attribute_name key for the
+                specified hyperedge.
+        :raises: ValueError -- No such hyperedge exists.
+        :raises: ValueError -- No such attribute exists.
+
+        Examples:
+        ::
+
+            >>> H = DirectedHypergraph()
+            >>> hyperedge_list = (["A"], ["B", "C"]),
+                                  (("A", "B"), ("C"), {weight: 2}),
+                                  (set(["B"]), set(["A", "C"])))
+            >>> hyperedge_ids = H.add_hyperedges(hyperedge_list)
+            >>> attribute = H.get_hyperedge_attribute(hyperedge_ids[0])
+
+        """
+        if not self.has_hyperedge_id(hyperedge_id):
+            raise ValueError("No such hyperedge exists.")
+        elif attribute_name not in self._hyperedge_attributes[hyperedge_id]:
+            raise ValueError("No such attribute exists.")
+        else:
+            return copy.\
+                copy(self._hyperedge_attributes[hyperedge_id][attribute_name])
 
     def get_hyperedge_tail(self, hyperedge_id):
-        pass
+        """Given a hyperedge ID, get a copy of that hyperedge's tail.
+
+        :param hyperedge_id: ID of the hyperedge to retrieve the tail from.
+        :returns: a copy of the container of nodes that the user provided
+                as the tail to the hyperedge referenced as hyperedge_id.
+
+        """
+        return self.get_hyperedge_attribute(hyperedge_id, "tail")
 
     def get_hyperedge_head(self, hyperedge_id):
-        pass
+        """Given a hyperedge ID, get a copy of that hyperedge's head.
+
+        :param hyperedge: ID of the hyperedge to retrieve the head from.
+        :returns: a copy of the container of nodes that the user provided
+            as the head to the hyperedge referenced as hyperedge_id.
+
+        """
+        return self.get_hyperedge_attribute(hyperedge_id, "head")
 
     def get_hyperedge_weight(self, hyperedge_id):
-        pass
+        """Given a hyperedge ID, get that hyperedge's weight.
+
+        :param hyperedge: ID of the hyperedge to retrieve the weight from.
+        :returns: a the weight of the hyperedge referenced as hyperedge_id.
+
+        """
+        return self.get_hyperedge_attribute(hyperedge_id, "weight")
 
     def get_hyperedge_pos_regs(self, hyperedge_id):
-        pass
+        """Given a hyperedge ID, get that hyperedge's positive regulators.
+
+        :param hyperedge: ID of the hyperedge to retrieve the positive
+                regulators from.
+        :returns: a set of the positive regulator hypernodes.
+
+        """
+        return self.get_hyperedge_attribute(hyperedge_id, "pos_regs")
 
     def get_hyperedge_neg_regs(self, hyperedge_id):
-        pass
+        """Given a hyperedge ID, get that hyperedge's negative regulators.
+
+        :param hyperedge: ID of the hyperedge to retrieve the negative
+                regulators from.
+        :returns: a set of the negative regulator hypernodes.
+
+        """
+        return self.get_hyperedge_attribute(hyperedge_id, "neg_regs")
 
     def get_backward_star(self, hypernode):
-        pass
+        """Given a hypernode, get a copy of that hypernode's backward star.
+
+        :param node: node to retrieve the backward-star of.
+        :returns: set -- set of hyperedge_ids for the hyperedges
+                in the hypernode's backward star.
+        :raises: ValueError -- No such node exists.
+
+        """
+        if hypernode not in self._hypernode_attributes:
+            raise ValueError("No such node exists.")
+        return self._backward_star[hypernode].copy()
 
     def read(self, file_name, node_delim=',',hypernode_delim='|', sep='\t'):
         pass
