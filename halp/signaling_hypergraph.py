@@ -232,6 +232,50 @@ class SignalingHypergraph(object):
         else:
             self._node_attributes[node].update(attr_dict)
 
+    def add_nodes(self, nodes, attr_dict=None, **attr):
+        """Adds multiple nodes to the graph, along with any related attributes
+            of the nodes.
+
+        :param nodes: iterable container to either references of the nodes
+                    OR tuples of (node reference, attribute dictionary);
+                    if an attribute dictionary is provided in the tuple,
+                    its values will override both attr_dict's and attr's
+                    values.
+        :param attr_dict: dictionary of attributes shared by all the nodes.
+        :param attr: keyword arguments of attributes of the node;
+                    attr's values will override attr_dict's values
+                    if both are provided.
+
+        See also:
+        add_node
+
+        Examples:
+        ::
+
+            >>> H = DirectedHypergraph()
+            >>> attributes = {label: "positive"}
+            >>> node_list = ["A",
+                             ("B", {label="negative"}),
+                             ("C", {root=True})]
+            >>> H.add_nodes(node_list, attributes)
+
+        """
+        attr_dict = self._combine_attribute_arguments(attr_dict, attr)
+
+        for node in nodes:
+            # Note: This won't behave properly if the node is actually a tuple
+            if type(node) is tuple:
+                # See ("B", {label="negative"}) in the documentation example
+                new_node, node_attr_dict = node
+                # Create a new dictionary and load it with node_attr_dict and
+                # attr_dict, with the former (node_attr_dict) taking precedence
+                new_dict = attr_dict.copy()
+                new_dict.update(node_attr_dict)
+                self.add_node(new_node, new_dict)
+            else:
+                # See "A" in the documentation example
+                self.add_node(node, attr_dict.copy())
+
     def get_node_set(self):
         """Returns the set of nodes that are currently in the hypergraph.
 

@@ -43,3 +43,34 @@ def test_add_node():
         pass
     except BaseException as e:
         assert False, e
+
+def test_add_nodes():
+    node_a = 'A'
+    node_b = 'B'
+    node_c = 'C'
+    attrib_c = {'alt_name': 1337}
+    node_d = 'D'
+    attrib_d = {'label': 'black', 'sink': True}
+    common_attrib = {'common': True, 'source': False}
+
+    node_list = [node_a, (node_b, {'source': False}),
+                 (node_c, attrib_c), (node_d, attrib_d)]
+
+    # Test adding unadded nodes with various attribute settings
+    H = SignalingHypergraph()
+    H.add_nodes(node_list, common_attrib)
+
+    common_attrib["__in_hypernodes"] = set()
+
+    assert node_a in H._node_attributes
+    assert H._node_attributes[node_a] == common_attrib
+
+    assert node_b in H._node_attributes
+    assert H._node_attributes[node_b]['source'] is False
+
+    assert node_c in H._node_attributes
+    assert H._node_attributes[node_c]['alt_name'] == 1337
+
+    assert node_d in H._node_attributes
+    assert H._node_attributes[node_d]['label'] == 'black'
+    assert H._node_attributes[node_d]['sink'] is True
