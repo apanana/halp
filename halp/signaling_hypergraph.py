@@ -590,3 +590,33 @@ class SignalingHypergraph(object):
         frozen_head = frozenset(head)
         return frozen_tail in self._successors and \
             frozen_head in self._successors[frozen_tail]
+
+    def has_hyperedge_id(self, hyperedge_id):
+        pass
+
+    def get_hyperedge_id_set(self):
+        pass
+
+    def get_hyperedge_attribute(self, hyperedge_id, attribute_name):
+        pass
+
+    def get_hyperedge_tail(self, hyperedge_id):
+        pass
+
+    def get_hyperedge_head(self, hyperedge_id):
+        pass
+
+    def get_hyperedge_weight(self, hyperedge_id):
+        pass
+
+    def get_hyperedge_pos_regs(self, hyperedge_id):
+        pass
+
+    def get_hyperedge_neg_regs(self, hyperedge_id):
+        pass
+
+    def get_backward_star(self, hypernode):
+        pass
+
+    def read(self, file_name, node_delim=',',hypernode_delim='|', sep='\t'):
+        pass
