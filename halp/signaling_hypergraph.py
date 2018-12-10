@@ -704,4 +704,80 @@ class SignalingHypergraph(object):
         return self._backward_star[hypernode].copy()
 
     def read(self, file_name, node_delim=',',hypernode_delim='|', sep='\t'):
-        pass
+        """Read a directed hypergraph from a file, where nodes are
+        represented as strings.
+        Each column is separated by "sep", and the individual
+        tail hypernodes and head hypernodes are delimited by "hypernode_delim".
+        The header line is currently ignored, but columns should be of
+        the format:
+        tailhn1[hypernode_delim]..tailhnM[sep]headhn1[hypernodelim]..headhnM[sep]weight
+
+        A hypernode should be specified as a hypernode, followed by a colon, followed
+        by a list of constituent nodes delimited by "node_delim". For example,
+        with node_delim=',', we specify a hypernode as:
+        ::
+
+            hn:n1[node_delim]..nN
+
+        As a concrete example, an arbitrary line with node_delim=',',
+        hypernode_delim='|' and sep='    ' (4 spaces) may look like:
+        ::
+
+            x1:n1,n2|x2:n3    x3:n1,n4|x4:|x5:n6,n7,n8    12
+
+        which defines a hyperedge of weight 12 from a tail set containing
+        hypernodes "x1" and "x2" to a head set containing hypernodes "x3", "x4", 
+        and "x5". Hypernodes are mapped to nodes in the following:
+            x1 consists of n1, n2
+            x2 consists of n3
+            x3 consists of n1, n4
+            x4 is an empty hypernode
+            x5 consists of n6, n7, n8
+        """
+        in_file = open(file_name, 'r')
+
+        # Skip the header line
+        in_file.readline()
+
+        line_number = 2
+        for line in in_file.readlines():
+            line = line.strip()
+            # Skip empty lines
+            if not line:
+                continue
+
+            words = line.split(sep)
+            if not (2 <= len(words) <= 3):
+                raise \
+                    IOError("Line {} ".format(line_number) +
+                            "contains {} ".format(len(words)) +
+                            "columns -- must contain only 2 or 3.")
+
+            # Tail column
+            tail = []
+            for hypernode in words[0].split(hypernode_delim):
+                if len(hypernode.split(":")) == 1:
+                    tail.append(hypernode)
+                else:
+                    hypernode_ref, nodes = hypernode.split(":")
+                    tail.append((hypernode_ref, set(nodes.split(node_delim)), {}))
+
+            # Head column
+            head = []
+            for hypernode in words[1].split(hypernode_delim):
+                if len(hypernode.split(":")) == 1:
+                    head.append(hypernode)
+                else:
+                    hypernode_ref, nodes = hypernode.split(":")
+                    head.append((hypernode_ref, set(nodes.split(node_delim)), {}))
+
+            # Weight column
+            if len(words) == 3:
+                weight = float(words[2].split(hypernode_delim)[0])
+            else:
+                weight = 1
+
+            self.add_hyperedge(tail, head, weight=weight)
+            line_number += 1
+
+        in_file.close()
