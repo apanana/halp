@@ -74,7 +74,7 @@ def test_from_networkx_graph():
 
     assert G_nodes == set(nxG_nodes)
 
-    for edge in nxG.edges_iter():
+    for edge in nxG.edges:
         assert G.has_hyperedge((edge[0], edge[1]))
 
     # Try transforming an invalid undirected hypergraph
