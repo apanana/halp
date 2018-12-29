@@ -31,8 +31,4 @@ RUN mv /tmp/usr .
 ENV LD_LIBRARY_PATH=/usr/local/lib:/root/lpsolve/lp_solve_dev/
 ENV PYTHONPATH=/root/lpsolve/usr/lib/python2.5/site-packages
 
-# To build image:
-# cd <halp_root_dir>
-# docker build . -t halp
-# To run: 
-# docker run -it -v <full_path_to_halp>:<full_path_to_halp> halp bash
+WORKDIR /root/halp
