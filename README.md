@@ -26,3 +26,13 @@ From within the container, we can check to see that tests pass
 ```
 $ ./run_test.sh
 ```
+
+Dependencies
+===========
+This project has dependencies on the following:
+- [networkx](https://networkx.github.io/)
+- [numpy](http://www.numpy.org/)
+- [scipy](http://www.scipy.org/)
+- [liblpsolve](http://lpsolve.sourceforge.net/5.5/)
+
+These are (hopefully!) taken care of via use of a docker container. For more details see `dockerfile`.
